@@ -1,9 +1,9 @@
 const fs = require('fs');
 const path = require('path');
+const { exportLeadToObsidian } = require('./obsidian_exporter');
 
 const DB_FILE = path.join(__dirname, 'database.json');
 
-// Helper to sanitize HTML strings to prevent XSS attacks
 function sanitize(str) {
   if (typeof str !== 'string') return str;
   return str
@@ -33,12 +33,10 @@ class SimpleDB {
     }
   }
 
-  // Synchronous initial save
   saveSync() {
     fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf8');
   }
 
-  // Batched asynchronous save (Fix #7: Batching IO writes)
   scheduleSave() {
     if (this.pendingWrites) return;
     this.pendingWrites = true;
@@ -46,7 +44,7 @@ class SimpleDB {
       fs.writeFile(DB_FILE, JSON.stringify(this.data, null, 2), 'utf8', () => {
         this.pendingWrites = false;
       });
-    }, 100); // 100ms batching window
+    }, 100);
   }
 
   addUser(user) {
@@ -63,7 +61,6 @@ class SimpleDB {
   }
 
   addLead(lead) {
-    // Fix #1: XSS Sanitization
     const sanitizedLead = {
       id: this.data.leads.length + 1,
       username: sanitize(lead.username),
@@ -74,6 +71,10 @@ class SimpleDB {
     };
     this.data.leads.push(sanitizedLead);
     this.scheduleSave();
+
+    // Automatic Obsidian Export
+    exportLeadToObsidian(sanitizedLead);
+
     return sanitizedLead;
   }
 
