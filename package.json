@@ -1,0 +1,14 @@
+{
+  "name": "nova-telegram-auth-bot",
+  "version": "1.0.0",
+  "description": "Nova AI Agent & Telegram OAuth Authorization Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node verify_all.js"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
