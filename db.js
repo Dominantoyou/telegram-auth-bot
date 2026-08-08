@@ -67,21 +67,30 @@ class SimpleDB {
       bio: sanitize(lead.bio),
       sourceChannel: sanitize(lead.sourceChannel),
       telegramId: sanitize(lead.telegramId),
-      createdAt: new Date().toISOString()
+      score: lead.score || 5,
+      createdAt: lead.createdAt || new Date().toISOString()
     };
     this.data.leads.push(sanitizedLead);
     this.scheduleSave();
 
     // Automatic Obsidian Export
-    exportLeadToObsidian(sanitizedLead);
+    try {
+      exportLeadToObsidian(sanitizedLead);
+    } catch (e) {}
 
     return sanitizedLead;
   }
 
+  getLeads(limit = 100) {
+    return this.data.leads.slice(-limit).reverse();
+  }
+
   getStats() {
+    const hotCount = this.data.leads.filter(l => (l.score || 5) >= 7).length;
     return {
       usersCount: this.data.users.length,
       leadsCount: this.data.leads.length,
+      hotLeadsCount: hotCount,
       logsCount: this.data.logs.length
     };
   }
